@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Создать событие{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📣 Новое событие</h2>
+
+    <form id="event-form">
+        <label>
+            <span>Заголовок</span>
+            <input type="text" name="title" placeholder="Введите заголовок уведомления" required>
+        </label>
+
+        <label>
+            <span>Сообщение</span>
+            <textarea name="message" placeholder="Введите текст сообщения" required></textarea>
+        </label>
+
+        <label>
+            <span>Категория</span>
+            <select name="category">
+                <option value="general">general (всем)</option>
+            </select>
+        </label>
+
+        <button type="submit">Отправить уведомление</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("event-form").addEventListener("submit", async (e) => {
+    e.preventDefault()
+
+    const form = e.target
+    const button = form.querySelector('button')
+    const originalText = button.textContent
+    
+    button.textContent = 'Отправка...'
+    button.disabled = true
+
+    try {
+        const payload = {
+            title: form.title.value,
+            message: form.message.value,
+            category: form.category.value,
+        }
+
+        const response = await fetch("/api/events/custom", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+        })
+
+        if (response.ok) {
+            form.reset()
+            button.textContent = '✓ Отправлено!'
+            setTimeout(() => {
+                button.textContent = originalText
+            }, 2000)
+        } else {
+            throw new Error('Ошибка отправки')
+        }
+    } catch (error) {
+        alert('Ошибка при отправке события')
+        console.error(error)
+    } finally {
+        button.disabled = false
+    }
+})
+</script>
+{% endblock %}
